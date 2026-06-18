@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\Product;
+use App\Models\User;
+
+class ProductPolicy
+{
+    public function update(User $user, Product $product): bool
+    {
+        return $user->id === $product->user_id || $user->isAdmin();
+    }
+
+    public function delete(User $user, Product $product): bool
+    {
+        return $user->id === $product->user_id || $user->isAdmin();
+    }
+
+    public function approve(User $user): bool
+    {
+        return $user->isAdmin();
+    }
+}
