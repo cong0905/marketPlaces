@@ -24,6 +24,15 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div class="mb-lg bg-error-container border-l-4 border-error p-md rounded-r-lg">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-error mr-3">error</span>
+                    <p class="text-body-md text-on-error-container font-medium">{{ session('error') }}</p>
+                </div>
+            </div>
+        @endif
+
         <form action="{{ route('checkout.store', $product->id) }}" method="POST">
             @csrf
             
@@ -111,6 +120,11 @@
                                 <span class="text-on-surface-variant">Phí vận chuyển:</span>
                                 <span class="text-[#006d39] font-bold">Thỏa thuận</span>
                             </div>
+                        </div>
+
+                        <div class="py-md border-b border-outline-variant">
+                            <label class="block text-label-md font-label-md text-on-surface mb-2">Mã giảm giá (Nếu có)</label>
+                            <input type="text" name="coupon_code" value="{{ old('coupon_code') }}" class="w-full rounded-lg border-outline-variant bg-surface focus:ring-primary focus:border-primary shadow-sm text-body-md uppercase" placeholder="Nhập mã giảm giá">
                         </div>
 
                         <div class="py-md flex justify-between items-center">

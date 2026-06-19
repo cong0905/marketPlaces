@@ -49,4 +49,22 @@
             </x-primary-button>
         </div>
     </form>
+
+    <div class="relative flex py-5 items-center">
+        <div class="flex-grow border-t border-outline-variant"></div>
+        <span class="flex-shrink mx-4 text-body-sm font-body-sm text-on-surface-variant">Hoặc đăng nhập bằng</span>
+        <div class="flex-grow border-t border-outline-variant"></div>
+    </div>
+
+    <div class="mt-2">
+        <a href="{{ route('auth.google') }}" class="flex items-center justify-center gap-3 w-full py-3 px-4 rounded-xl border border-outline-variant hover:border-primary hover:bg-surface-container-low transition-all duration-300 shadow-sm font-body-md text-on-surface">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21.35,11.1H12v2.7h5.38c-0.24,1.28 -0.96,2.37 -2.04,3.1v2.6h3.3c1.93,-1.78 3.04,-4.4 3.04,-7.4c0,-0.72 -0.07,-1.4 -0.19,-2.0z" fill="#4285F4" />
+                <path d="M12,20.7c2.43,0 4.47,-0.8 5.96,-2.2l-3.3,-2.6c-0.9,0.6 -2.07,0.98 -3.3,0.98 -2.34,0 -4.33,-1.58 -5.04,-3.7H3v2.6c1.5,3.0 4.6,5.0 8.0,5.0z" fill="#34A853" />
+                <path d="M6.96,13.18C6.78,12.68 6.7,12.15 6.7,11.6c0,-0.55 0.08,-1.08 0.26,-1.58V7.4H3C2.36,8.68 2,10.1 2,11.6c0,1.5 0.36,2.92 1,4.2l3.96,-3.02z" fill="#FBBC05" />
+                <path d="M12,5.18c1.3,0 2.5,0.45 3.4,1.3l2.6,-2.6C16.4,2.3 14.4,1.5 12,1.5c-3.4,0 -6.5,2.0 -8.0,5.0l3.96,3.02c0.7,-2.12 2.7,-3.7 5.04,-3.7z" fill="#EA4335" />
+            </svg>
+            <span class="font-medium">Tiếp tục với Google</span>
+        </a>
+    </div>
 </x-guest-layout>

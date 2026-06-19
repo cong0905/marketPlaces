@@ -1,4 +1,4 @@
-<nav x-data="{ open: false, userMenuOpen: false }" class="bg-surface/80 dark:bg-surface-dim/80 docked full-width top-0 sticky backdrop-blur-md border-b border-outline-variant dark:border-outline shadow-sm z-50">
+<nav x-data="navigationComponent" class="bg-surface/80 dark:bg-surface-dim/80 docked full-width top-0 sticky backdrop-blur-md border-b border-outline-variant dark:border-outline shadow-sm z-50">
     <div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop h-20 flex justify-between items-center w-full">
         <div class="flex justify-between items-center w-full">
             
@@ -36,11 +36,27 @@
                         $allNotifications = auth()->user()->notifications()->latest()->take(10)->get();
                         $unreadCount = $unreadNotifications->count();
                     @endphp
+                    <!-- Chat Icon -->
+                    @php
+                        $unreadMessagesCount = \App\Models\Message::whereHas('conversation', function($q) {
+                            $q->where('buyer_id', auth()->id())->orWhere('seller_id', auth()->id());
+                        })->where('sender_id', '!=', auth()->id())->whereNull('read_at')->count();
+                    @endphp
+                    <a href="{{ route('chat.index') }}" class="p-2 text-outline hover:text-primary transition-colors relative focus:outline-none flex items-center justify-center" title="Tin nhắn">
+                        <span class="material-symbols-outlined" style="font-size: 26px;">chat</span>
+                        <template x-if="unreadMessagesCount > 0">
+                            <span class="absolute top-1 right-1 flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-error"></span>
+                            </span>
+                        </template>
+                    </a>
+
                     <!-- Notifications -->
                     <x-dropdown align="right" width="80" contentClasses="py-0 bg-surface-container-lowest border border-outline-variant shadow-xl overflow-hidden rounded-xl">
                         <x-slot name="trigger">
                             <button class="p-2 text-outline hover:text-primary transition-colors relative focus:outline-none">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                <span class="material-symbols-outlined" style="font-size: 26px;">notifications</span>
                                 @if($unreadCount > 0)
                                 <span class="absolute top-1 right-1 flex h-2 w-2">
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
@@ -117,8 +133,12 @@
                                 @endif
 
                                 <x-dropdown-link :href="route('dashboard')" class="flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-outline" style="font-size: 18px;">article</span>
-                                    {{ __('Quản lý tin đăng') }}
+                                    <span class="material-symbols-outlined text-outline" style="font-size: 18px;">dashboard</span>
+                                    {{ __('Bảng điều khiển') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('favorites.index')" class="flex items-center gap-2 text-error hover:bg-error-container/20">
+                                    <span class="material-symbols-outlined text-error" style="font-size: 18px; font-variation-settings: 'FILL' 1;">favorite</span>
+                                    {{ __('Danh sách yêu thích') }}
                                 </x-dropdown-link>
                                 <x-dropdown-link :href="route('profile.edit')" class="flex items-center gap-2">
                                     <span class="material-symbols-outlined text-outline" style="font-size: 18px;">settings</span>
@@ -187,7 +207,8 @@
                     @if(Auth::user()->isAdmin())
                         <x-responsive-nav-link :href="route('admin.dashboard')">{{ __('Admin Dashboard') }}</x-responsive-nav-link>
                     @endif
-                    <x-responsive-nav-link :href="route('dashboard')">{{ __('Quản lý tin đăng') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('dashboard')">{{ __('Bảng điều khiển') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('favorites.index')">{{ __('Danh sách yêu thích') }}</x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('profile.edit')">{{ __('Cài đặt tài khoản') }}</x-responsive-nav-link>
 
                     <form method="POST" action="{{ route('logout') }}">
@@ -206,3 +227,38 @@
         @endauth
     </div>
 </nav>
+
+@auth
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('navigationComponent', () => ({
+            open: false,
+            userMenuOpen: false,
+            unreadMessagesCount: {{ $unreadMessagesCount ?? 0 }},
+            init() {
+                // Đợi 1 giây để đảm bảo Vite đã tải xong window.Echo
+                setTimeout(() => {
+                    if (window.Echo) {
+                        window.Echo.private(`App.Models.User.{{ auth()->id() }}`)
+                            .listen('MessageSent', (e) => {
+                                console.log("GLOBAL NAV: Có tin nhắn mới!");
+                                this.unreadMessagesCount++;
+                            });
+                    }
+                }, 1000);
+            }
+        }));
+    });
+</script>
+@endauth
+@guest
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('navigationComponent', () => ({
+            open: false,
+            userMenuOpen: false,
+            unreadMessagesCount: 0
+        }));
+    });
+</script>
+@endguest

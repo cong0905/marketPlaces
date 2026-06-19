@@ -8,6 +8,15 @@ use Illuminate\Http\Request;
 class FavoriteController extends Controller
 {
     /**
+     * View user's favorite products.
+     */
+    public function index()
+    {
+        $favorites = auth()->user()->favoriteProducts()->paginate(12);
+        return view('profile.favorites', compact('favorites'));
+    }
+
+    /**
      * Toggle favorite status for a product.
      */
     public function toggle(Product $product)

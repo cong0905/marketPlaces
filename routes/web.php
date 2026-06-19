@@ -56,6 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Favorites
+    Route::get('/yeu-thich', [\App\Http\Controllers\FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('/yeu-thich/{product}', [\App\Http\Controllers\FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
     // Product CRUD (authenticated)

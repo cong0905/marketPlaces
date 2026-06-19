@@ -55,6 +55,93 @@
         </div>
     </section>
 
+    <!-- Flash Sales Section -->
+    @if(isset($flashSales) && $flashSales->count() > 0)
+    <section class="py-xl bg-[#fff8e1] dark:bg-[#453600] px-margin-mobile md:px-margin-desktop border-y border-[#ffeb3b]/30 relative overflow-hidden">
+        <!-- Decor -->
+        <div class="absolute -top-10 -right-10 text-[#ffeb3b]/20">
+            <span class="material-symbols-outlined" style="font-size: 200px; font-variation-settings: 'FILL' 1;">bolt</span>
+        </div>
+        
+        <div class="max-w-container-max mx-auto relative z-10">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-lg">
+                <div class="flex items-center gap-sm">
+                    <span class="material-symbols-outlined text-[#f59e0b] animate-pulse" style="font-size: 40px; font-variation-settings: 'FILL' 1;">bolt</span>
+                    <h2 class="text-headline-md font-headline-md text-on-surface uppercase tracking-wide">Giờ Vàng Giá Sốc</h2>
+                    
+                    @php $firstSale = $flashSales->first(); @endphp
+                    <!-- AlpineJS Countdown Timer -->
+                    <div x-data="countdown('{{ $firstSale->ends_at->toIso8601String() }}')" class="flex items-center gap-2 ml-4">
+                        <div class="bg-error text-white font-bold rounded px-2 py-1 text-label-lg" x-text="hours">00</div>
+                        <span class="text-error font-bold">:</span>
+                        <div class="bg-error text-white font-bold rounded px-2 py-1 text-label-lg" x-text="minutes">00</div>
+                        <span class="text-error font-bold">:</span>
+                        <div class="bg-error text-white font-bold rounded px-2 py-1 text-label-lg" x-text="seconds">00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-gutter">
+                @foreach($flashSales as $sale)
+                    @php $product = $sale->product; @endphp
+                    <!-- Flash Sale Card -->
+                    <div class="bg-surface rounded-lg border border-[#ffeb3b] overflow-hidden shadow-[0_4px_20px_-4px_rgba(245,158,11,0.2)] hover:-translate-y-1 transition-all group cursor-pointer flex flex-col relative">
+                        <div class="absolute top-0 right-0 bg-error text-white px-2 py-1 rounded-bl-lg z-10 font-bold text-label-sm shadow-sm">
+                            -{{ round((($product->price - $sale->discount_price) / $product->price) * 100) }}%
+                        </div>
+                        <a href="{{ route('products.show', $product->slug) }}" class="relative w-full pb-[100%] bg-surface-container block">
+                            @if($product->primary_image)
+                                <img src="{{ $product->primary_image_medium_url }}" alt="{{ $product->title }}" class="absolute inset-0 object-cover w-full h-full group-hover:scale-105 transition-transform duration-300">
+                            @endif
+                        </a>
+                        <div class="p-md flex flex-col flex-1">
+                            <a href="{{ route('products.show', $product->slug) }}">
+                                <h3 class="text-body-sm font-body-sm text-on-surface line-clamp-2 mb-xs group-hover:text-primary transition-colors">{{ $product->title }}</h3>
+                            </a>
+                            <div class="flex flex-col mt-auto">
+                                <span class="text-price-lg font-price-lg text-error font-bold">{{ number_format($sale->discount_price, 0, ',', '.') }} ₫</span>
+                                <span class="text-body-sm text-outline-variant line-through">{{ $product->formatted_price }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('countdown', (targetDate) => ({
+                target: new Date(targetDate).getTime(),
+                now: new Date().getTime(),
+                distance: 0,
+                hours: '00',
+                minutes: '00',
+                seconds: '00',
+                init() {
+                    this.update();
+                    setInterval(() => this.update(), 1000);
+                },
+                update() {
+                    this.now = new Date().getTime();
+                    this.distance = this.target - this.now;
+                    if (this.distance < 0) {
+                        this.hours = '00'; this.minutes = '00'; this.seconds = '00';
+                        return;
+                    }
+                    let h = Math.floor((this.distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    let m = Math.floor((this.distance % (1000 * 60 * 60)) / (1000 * 60));
+                    let s = Math.floor((this.distance % (1000 * 60)) / 1000);
+                    
+                    this.hours = String(h).padStart(2, '0');
+                    this.minutes = String(m).padStart(2, '0');
+                    this.seconds = String(s).padStart(2, '0');
+                }
+            }))
+        })
+    </script>
+    @endif
+
     <!-- Featured Products -->
     <section class="py-xl bg-surface-container-lowest px-margin-mobile md:px-margin-desktop">
         <div class="max-w-container-max mx-auto">

@@ -49,10 +49,19 @@ class CheckoutController extends Controller
             'address' => 'required|string|max:255',
             'payment_method' => 'required|in:cod,vnpay', // App\Enums\PaymentMethod values
             'note' => 'nullable|string|max:500',
+            'coupon_code' => 'nullable|string|exists:coupons,code',
         ]);
 
         try {
-            $order = $this->orderService->placeOrder(auth()->user(), $product, $validated);
+            $coupon = null;
+            if (!empty($validated['coupon_code'])) {
+                $coupon = \App\Models\Coupon::where('code', $validated['coupon_code'])->first();
+                if (!$coupon || !$coupon->isValid()) {
+                    return redirect()->back()->withInput()->with('error', 'Mã giảm giá không hợp lệ hoặc đã hết hạn.');
+                }
+            }
+
+            $order = $this->orderService->placeOrder(auth()->user(), $product, $validated, $coupon);
 
             // Simple COD simulation
             if ($validated['payment_method'] === 'cod') {

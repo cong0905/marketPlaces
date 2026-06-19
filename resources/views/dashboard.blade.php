@@ -109,6 +109,7 @@
                                     {{ $order->status->label() }}
                                 </span>
                             </div>
+                            <x-order-timeline :order="$order" />
                             <div class="p-md flex gap-md items-start">
                                 @php $product = $order->items->first()->product; @endphp
                                 <img src="{{ $product->primary_image_medium_url }}" alt="" class="w-20 h-20 object-cover rounded border border-outline-variant">
@@ -183,7 +184,30 @@
 
             @elseif($tab === 'sales')
                 <!-- My Sales -->
-                <h2 class="text-headline-sm font-headline-sm text-on-surface mb-lg">Đơn hàng khách đặt</h2>
+                <h2 class="text-headline-sm font-headline-sm text-on-surface mb-lg">Kênh Người Bán: Quản lý Đơn hàng</h2>
+                
+                <!-- Seller Statistics -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-lg">
+                    <div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl flex items-center gap-4">
+                        <div class="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container">
+                            <span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+                        </div>
+                        <div>
+                            <p class="text-body-sm text-on-surface-variant font-medium">Tổng Doanh Thu</p>
+                            <p class="text-headline-sm font-bold text-primary">{{ isset($totalRevenue) ? number_format($totalRevenue, 0, ',', '.') : 0 }} ₫</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl flex items-center gap-4">
+                        <div class="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container">
+                            <span class="material-symbols-outlined text-[24px]">pending_actions</span>
+                        </div>
+                        <div>
+                            <p class="text-body-sm text-on-surface-variant font-medium">Đơn Đang Xử Lý & Giao Hàng</p>
+                            <p class="text-headline-sm font-bold text-on-surface">{{ $pendingOrdersCount ?? 0 }} đơn</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="space-y-md">
                     @forelse($sales as $order)
                         <div class="border border-outline-variant rounded-xl overflow-hidden bg-surface-container-lowest">
@@ -196,6 +220,7 @@
                                     {{ $order->status->label() }}
                                 </span>
                             </div>
+                            <x-order-timeline :order="$order" />
                             <div class="p-md flex gap-md items-start">
                                 @php $product = $order->items->first()->product; @endphp
                                 <img src="{{ $product->primary_image_medium_url }}" alt="" class="w-20 h-20 object-cover rounded border border-outline-variant">

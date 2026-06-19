@@ -244,6 +244,15 @@
                                     <p class="text-body-sm font-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
                                         Tham gia: {{ $product->user->created_at->format('m/Y') }}
                                     </p>
+                                    <!-- Badges -->
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        @foreach($product->user->seller_badges as $badge)
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ $badge['color'] }}" title="{{ $badge['label'] }}">
+                                                {!! $badge['icon'] !!}
+                                                {{ $badge['label'] }}
+                                            </span>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                         </div>

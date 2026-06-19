@@ -24,8 +24,13 @@ class MessageSent implements ShouldBroadcastNow
 
     public function broadcastOn(): array
     {
+        $otherUserId = $this->message->conversation->buyer_id === $this->message->sender_id 
+            ? $this->message->conversation->seller_id 
+            : $this->message->conversation->buyer_id;
+
         return [
             new PrivateChannel('conversation.' . $this->message->conversation_id),
+            new PrivateChannel('App.Models.User.' . $otherUserId),
         ];
     }
 

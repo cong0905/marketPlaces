@@ -7,7 +7,11 @@
             </div>
             
             <h1 class="text-headline-md font-headline-md text-on-surface mb-xs">Đặt hàng thành công!</h1>
-            <p class="text-body-md text-on-surface-variant mb-xl">Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được ghi nhận.</p>
+            <p class="text-body-md text-on-surface-variant mb-lg">Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được ghi nhận.</p>
+            
+            <div class="mb-xl text-left border border-outline-variant rounded-xl overflow-hidden">
+                <x-order-timeline :order="$order" />
+            </div>
             
             <div class="bg-surface-container-low rounded-xl p-md mb-xl text-left">
                 <h3 class="text-label-md font-label-md text-on-surface mb-md">Chi tiết đơn hàng</h3>
@@ -32,10 +36,14 @@
                         <span class="font-bold text-on-surface">{{ $order->payment_method->label() }}</span>
                     </div>
                     <div>
+                        <span class="text-on-surface-variant block mb-1">Tổng thanh toán:</span>
+                        <span class="font-bold text-primary">{{ number_format($order->total_amount, 0, ',', '.') }} ₫</span>
+                    </div>
+                    <div>
                         <span class="text-on-surface-variant block mb-1">Người nhận:</span>
                         <span class="font-bold text-on-surface">{{ $order->shipping_name }} - {{ $order->shipping_phone }}</span>
                     </div>
-                    <div>
+                    <div class="col-span-2">
                         <span class="text-on-surface-variant block mb-1">Địa chỉ giao hàng:</span>
                         <span class="font-bold text-on-surface">{{ $order->shipping_address }}</span>
                     </div>
@@ -54,7 +62,7 @@
                 <x-button variant="outlined" href="{{ route('home') }}" class="w-full sm:w-auto">
                     Tiếp tục mua sắm
                 </x-button>
-                <x-button variant="filled" href="{{ route('dashboard', ['tab' => 'orders']) }}" class="w-full sm:w-auto">
+                <x-button variant="filled" href="{{ route('dashboard', ['tab' => 'purchases']) }}" class="w-full sm:w-auto">
                     Xem đơn mua
                 </x-button>
                 <x-button variant="outlined" href="{{ route('chat.start', $product->id) }}" class="w-full sm:w-auto">

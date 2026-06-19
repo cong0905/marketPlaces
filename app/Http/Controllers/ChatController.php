@@ -88,13 +88,19 @@ class ChatController extends Controller
 
         $message = $conversation->messages()->create([
             'sender_id' => auth()->id(),
-            'body' => Purifier::clean($request->body),
+            'body' => $request->body,
         ]);
 
         $conversation->update(['last_message_at' => now()]);
 
         // Broadcast event for Reverb
         broadcast(new MessageSent($message))->toOthers();
+
+        // Send Email if the recipient is offline
+        $otherUser = $conversation->getOtherUser(auth()->user());
+        if (!$otherUser->is_online || ($otherUser->last_seen_at && $otherUser->last_seen_at->diffInMinutes(now()) > 5)) {
+            \Illuminate\Support\Facades\Mail::to($otherUser->email)->send(new \App\Mail\NewMessageMail($message));
+        }
 
         return response()->json($message->load('sender'));
     }

@@ -13,19 +13,32 @@ use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
-    public function placeOrder(User $buyer, Product $product, array $shippingData): Order
+    public function placeOrder(User $buyer, Product $product, array $shippingData, ?\App\Models\Coupon $coupon = null): Order
     {
-        return DB::transaction(function () use ($buyer, $product, $shippingData) {
+        return DB::transaction(function () use ($buyer, $product, $shippingData, $coupon) {
+            
+            $discountAmount = 0;
+            if ($coupon) {
+                $discountAmount = $coupon->calculateDiscount($product->price);
+                if ($discountAmount > 0) {
+                    $coupon->increment('used_count');
+                }
+            }
+            
+            $totalAmount = max(0, $product->price - $discountAmount);
+
             $order = Order::create([
                 'buyer_id' => $buyer->id,
                 'seller_id' => $product->user_id,
-                'total_amount' => $product->price,
+                'total_amount' => $totalAmount,
                 'status' => OrderStatus::PENDING,
                 'payment_method' => $shippingData['payment_method'] ?? PaymentMethod::COD,
                 'shipping_address' => $shippingData['address'],
                 'shipping_name' => $shippingData['name'],
                 'shipping_phone' => $shippingData['phone'],
                 'note' => $shippingData['note'] ?? null,
+                'coupon_id' => $coupon ? $coupon->id : null,
+                'discount_amount' => $discountAmount,
             ]);
 
             $order->items()->create([
@@ -36,7 +49,7 @@ class OrderService
             // Create pending payment record
             $order->payments()->create([
                 'method' => $shippingData['payment_method'] ?? PaymentMethod::COD,
-                'amount' => $product->price,
+                'amount' => $totalAmount,
                 'status' => PaymentStatus::PENDING,
             ]);
 
@@ -52,18 +65,30 @@ class OrderService
             // Notify the seller
             $order->seller->notify(new \App\Notifications\OrderPlacedNotification($order));
 
+            // Send Emails
+            \Illuminate\Support\Facades\Mail::to($buyer->email)->send(new \App\Mail\OrderPlacedMail($order, 'buyer'));
+            \Illuminate\Support\Facades\Mail::to($product->user->email)->send(new \App\Mail\OrderPlacedMail($order, 'seller'));
+
             return $order;
         });
     }
 
     public function confirmOrder(Order $order): bool
     {
-        return $order->confirm();
+        $result = $order->confirm();
+        if ($result) {
+            \Illuminate\Support\Facades\Mail::to($order->buyer->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+        }
+        return $result;
     }
 
     public function shipOrder(Order $order): bool
     {
-        return $order->ship();
+        $result = $order->ship();
+        if ($result) {
+            \Illuminate\Support\Facades\Mail::to($order->buyer->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+        }
+        return $result;
     }
 
     public function completeOrder(Order $order): bool
@@ -79,6 +104,8 @@ class OrderService
             // Update transaction counts
             $order->buyer->increment('total_transactions');
             $order->seller->increment('total_transactions');
+            
+            \Illuminate\Support\Facades\Mail::to($order->seller->email)->send(new \App\Mail\OrderStatusChangedMail($order));
         }
 
         return $result;
@@ -96,6 +123,9 @@ class OrderService
                 $item->product->sold_at = null;
                 $item->product->save();
             }
+            
+            $recipient = $order->buyer_id === auth()->id() ? $order->seller : $order->buyer;
+            \Illuminate\Support\Facades\Mail::to($recipient->email)->send(new \App\Mail\OrderStatusChangedMail($order));
         }
 
         return $result;
