@@ -73,7 +73,7 @@ class CheckoutController extends Controller
             $vnpayUrl = $this->vnpayService->generatePaymentUrl($order, $request);
             return redirect()->away($vnpayUrl);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }

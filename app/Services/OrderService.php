@@ -65,9 +65,13 @@ class OrderService
             // Notify the seller
             $order->seller->notify(new \App\Notifications\OrderPlacedNotification($order));
 
-            // Send Emails
-            \Illuminate\Support\Facades\Mail::to($buyer->email)->send(new \App\Mail\OrderPlacedMail($order, 'buyer'));
-            \Illuminate\Support\Facades\Mail::to($product->user->email)->send(new \App\Mail\OrderPlacedMail($order, 'seller'));
+            // Send Emails (Bọc try/catch để tránh lỗi 500 khi chưa cấu hình Mail SMTP)
+            try {
+                \Illuminate\Support\Facades\Mail::to($buyer->email)->send(new \App\Mail\OrderPlacedMail($order, 'buyer'));
+                \Illuminate\Support\Facades\Mail::to($product->user->email)->send(new \App\Mail\OrderPlacedMail($order, 'seller'));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email đặt hàng: ' . $e->getMessage());
+            }
 
             return $order;
         });
@@ -77,7 +81,11 @@ class OrderService
     {
         $result = $order->confirm();
         if ($result) {
-            \Illuminate\Support\Facades\Mail::to($order->buyer->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+            try {
+                \Illuminate\Support\Facades\Mail::to($order->buyer->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email xác nhận: ' . $e->getMessage());
+            }
         }
         return $result;
     }
@@ -86,7 +94,11 @@ class OrderService
     {
         $result = $order->ship();
         if ($result) {
-            \Illuminate\Support\Facades\Mail::to($order->buyer->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+            try {
+                \Illuminate\Support\Facades\Mail::to($order->buyer->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email giao hàng: ' . $e->getMessage());
+            }
         }
         return $result;
     }
@@ -105,7 +117,11 @@ class OrderService
             $order->buyer->increment('total_transactions');
             $order->seller->increment('total_transactions');
             
-            \Illuminate\Support\Facades\Mail::to($order->seller->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+            try {
+                \Illuminate\Support\Facades\Mail::to($order->seller->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email hoàn thành: ' . $e->getMessage());
+            }
         }
 
         return $result;
@@ -125,7 +141,11 @@ class OrderService
             }
             
             $recipient = $order->buyer_id === auth()->id() ? $order->seller : $order->buyer;
-            \Illuminate\Support\Facades\Mail::to($recipient->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+            try {
+                \Illuminate\Support\Facades\Mail::to($recipient->email)->send(new \App\Mail\OrderStatusChangedMail($order));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Lỗi gửi email hủy đơn: ' . $e->getMessage());
+            }
         }
 
         return $result;
