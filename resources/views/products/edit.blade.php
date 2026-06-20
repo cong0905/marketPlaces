@@ -111,15 +111,29 @@
                         Hình ảnh & Giao dịch
                     </h2>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-md mb-md">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-md mb-md" x-data="locationSelector('{{ old('province_id', $product->province_id) }}', '{{ old('district_id', $product->district_id) }}')">
                         <div>
                             <label class="block text-label-md font-label-md text-on-surface mb-xs">Tỉnh/Thành phố <span class="text-error">*</span></label>
-                            <x-custom-select name="province_id" :options="$provinceOptions" :selected="old('province_id', $product->province_id)" placeholder="Chọn khu vực" :required="true" />
+                            <div class="relative">
+                                <select name="province_id" class="w-full rounded-lg border-outline-variant bg-surface focus:ring-primary focus:border-primary shadow-sm text-body-md text-on-surface appearance-none pr-10" required :disabled="isLoading" @change="onProvinceChange($event)" x-model="provinceId">
+                                    <option value="">-- Chọn khu vực --</option>
+                                    <template x-for="prov in provinces" :key="prov.id">
+                                        <option :value="prov.id" x-text="prov.name"></option>
+                                    </template>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none" x-show="isLoading">
+                                    <span class="material-symbols-outlined animate-spin text-on-surface-variant">autorenew</span>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-label-md font-label-md text-on-surface mb-xs">Quận/Huyện</label>
-                            <input type="text" disabled placeholder="Tạm thời chưa hỗ trợ chọn Quận/Huyện" class="w-full rounded-lg border-outline-variant bg-surface focus:ring-primary focus:border-primary shadow-sm text-body-md text-on-surface opacity-50">
-                            <!-- TODO: Add ajax logic for district selection based on province_id -->
+                            <select name="district_id" class="w-full rounded-lg border-outline-variant bg-surface focus:ring-primary focus:border-primary shadow-sm text-body-md text-on-surface appearance-none" :disabled="!districts.length || isLoading" x-model="districtId">
+                                <option value="">-- Chọn Quận/Huyện --</option>
+                                <template x-for="dist in districts" :key="dist.id">
+                                    <option :value="dist.id" x-text="dist.name"></option>
+                                </template>
+                            </select>
                         </div>
                     </div>
 
@@ -178,6 +192,48 @@
 
                 <script>
                     document.addEventListener('alpine:init', () => {
+                        Alpine.data('locationSelector', (initialProvinceId, initialDistrictId) => ({
+                            provinceId: initialProvinceId,
+                            districtId: initialDistrictId,
+                            provinces: [],
+                            districts: [],
+                            isLoading: true,
+                            
+                            init() {
+                                fetch('/api/locations')
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        this.provinces = data;
+                                        this.isLoading = false;
+                                        
+                                        if (this.provinceId) {
+                                            const selectedProv = this.provinces.find(p => p.id == this.provinceId);
+                                            if (selectedProv) {
+                                                this.districts = selectedProv.districts;
+                                            }
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error('Failed to load locations:', err);
+                                        this.isLoading = false;
+                                    });
+                            },
+                            
+                            onProvinceChange(e) {
+                                const selectedId = e.target.value;
+                                this.provinceId = selectedId;
+                                this.districtId = '';
+                                this.districts = [];
+                                
+                                if (selectedId) {
+                                    const selectedProv = this.provinces.find(p => p.id == selectedId);
+                                    if (selectedProv) {
+                                        this.districts = selectedProv.districts;
+                                    }
+                                }
+                            }
+                        }));
+
                         Alpine.data('imageUploader', () => ({
                             images: [],
                             isDragging: false,
