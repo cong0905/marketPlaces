@@ -62,13 +62,18 @@ class OrderService
 
             $order->load(['items.product', 'buyer', 'seller']);
 
-            // Notify the seller
-            $order->seller->notify(new \App\Notifications\OrderPlacedNotification($order));
-
-            // Send Emails (Bọc try/catch để tránh lỗi 500 khi chưa cấu hình Mail SMTP)
+            // Send Notifications & Emails (Bọc try/catch để tránh lỗi 500)
             try {
+                // Notify the seller (Database)
+                if ($order->seller) {
+                    $order->seller->notify(new \App\Notifications\OrderPlacedNotification($order));
+                }
+
+                // Gửi email
                 \Illuminate\Support\Facades\Mail::to($buyer->email)->send(new \App\Mail\OrderPlacedMail($order, 'buyer'));
-                \Illuminate\Support\Facades\Mail::to($product->user->email)->send(new \App\Mail\OrderPlacedMail($order, 'seller'));
+                if ($product->user) {
+                    \Illuminate\Support\Facades\Mail::to($product->user->email)->send(new \App\Mail\OrderPlacedMail($order, 'seller'));
+                }
             } catch (\Throwable $e) {
                 \Illuminate\Support\Facades\Log::error('Lỗi gửi email đặt hàng: ' . $e->getMessage());
             }
