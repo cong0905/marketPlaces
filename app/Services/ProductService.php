@@ -114,10 +114,13 @@ class ProductService
             Storage::disk('public')->put($path . 'thumb_' . $filename, (string) $thumbnail->toWebp(80));
         } catch (\Exception $e) {
             // Fallback if GD is missing or ImageManager fails on production
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $extension = $file->getClientOriginalExtension() ?: 'jpg';
+            $filename = uniqid() . '.' . $extension;
+            
+            // storeAs moves the file, so we do it once and then copy it
             $file->storeAs($path, 'original_' . $filename, 'public');
-            $file->storeAs($path, 'medium_' . $filename, 'public');
-            $file->storeAs($path, 'thumb_' . $filename, 'public');
+            Storage::disk('public')->copy($path . 'original_' . $filename, $path . 'medium_' . $filename);
+            Storage::disk('public')->copy($path . 'original_' . $filename, $path . 'thumb_' . $filename);
         }
 
         return $product->images()->create([
