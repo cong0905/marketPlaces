@@ -46,6 +46,32 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Reveal Animations Script -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '0px',
+                    threshold: 0.15
+                };
+
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate-fade-in-up');
+                            entry.target.classList.remove('opacity-0');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                document.querySelectorAll('.reveal-on-scroll').forEach((el) => {
+                    el.classList.add('opacity-0');
+                    observer.observe(el);
+                });
+            });
+        </script>
     </head>
     <body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
         @include('layouts.navigation')
