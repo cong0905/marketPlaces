@@ -41,6 +41,14 @@ class Product extends Model
                 $product->slug = Str::slug($product->title) . '-' . Str::random(6);
             }
         });
+
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('home.latest_products');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('home.latest_products');
+        });
     }
 
     // ── Relationships ──────────────────────────────────

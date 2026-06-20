@@ -17,6 +17,17 @@ class ProductImage extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('home.latest_products');
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('home.latest_products');
+        });
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
