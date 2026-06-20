@@ -20,11 +20,11 @@ class ProductImage extends Model
     protected static function booted(): void
     {
         static::saved(function () {
-            \Illuminate\Support\Facades\Cache::forget('home.latest_products');
+            // \Illuminate\Support\Facades\Cache::forget('home.latest_products');
         });
 
         static::deleted(function () {
-            \Illuminate\Support\Facades\Cache::forget('home.latest_products');
+            // \Illuminate\Support\Facades\Cache::forget('home.latest_products');
         });
     }
 

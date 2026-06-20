@@ -16,9 +16,7 @@ class HomeController extends Controller
 
     public function index()
     {
-        $products = Cache::remember('home.latest_products', 600, function () {
-            return $this->productRepo->getActiveProducts(12);
-        });
+        $products = $this->productRepo->getActiveProducts(12);
         $categories = $this->categoryRepo->getActiveWithChildren();
 
         $flashSales = \App\Models\FlashSale::with(['product.images', 'product.province'])
