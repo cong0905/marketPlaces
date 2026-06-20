@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: amber-marketplace
+    env: docker
+    plan: free
+    dockerCommand: "" # Sử dụng CMD mặc định trong Dockerfile
+    envVars:
+      - key: APP_NAME
+        value: "Amber Marketplace"
+      - key: APP_ENV
+        value: "production"
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        # Thay đổi dòng này thành URL thực tế của bạn sau khi triển khai
+        value: "https://amber-marketplace.onrender.com"
+      
+      # Cấu hình kết nối TiDB Serverless
+      - key: DB_CONNECTION
+        value: "mysql"
+      - key: DB_HOST
+        value: "gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com" 
+      - key: DB_PORT
+        value: "4000"
+      - key: DB_DATABASE
+        value: "marketplace"
+      - key: DB_USERNAME
+        value: "2oisES4cgc6mFHk.root"
+      - key: DB_PASSWORD
+        sync: false # Render sẽ yêu cầu bạn nhập mật khẩu trên Dashboard (Mật khẩu của bạn là: WjACFlCNbNZ7jJft)
+      
+      # TiDB Serverless yêu cầu kết nối bảo mật (SSL)
+      - key: MYSQL_ATTR_SSL_CA
+        value: "/etc/ssl/certs/ca-certificates.crt"
