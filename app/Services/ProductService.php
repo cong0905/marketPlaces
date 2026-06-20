@@ -103,6 +103,7 @@ class ProductService
             
             $path = 'cloudinary://' . $response->getPublicId();
         } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Cloudinary Upload Failed: ' . $e->getMessage() . ' Trace: ' . $e->getTraceAsString());
             // Fallback to local storage if Cloudinary fails
             $path = 'products/' . $product->id . '/';
             Storage::disk('public')->makeDirectory($path);
