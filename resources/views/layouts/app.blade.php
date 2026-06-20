@@ -45,6 +45,20 @@
         </style>
 
         <!-- Scripts -->
+        <script>
+            window.EchoConfig = {
+                broadcaster: '{{ env('BROADCAST_CONNECTION', 'reverb') }}',
+                reverbKey: '{{ env('REVERB_APP_KEY') }}',
+                reverbHost: '{{ env('REVERB_HOST', '127.0.0.1') }}',
+                reverbPort: {{ env('REVERB_PORT', 80) }},
+                reverbScheme: '{{ env('REVERB_SCHEME', 'http') }}',
+                pusherKey: '{{ env('PUSHER_APP_KEY') }}',
+                pusherCluster: '{{ env('PUSHER_APP_CLUSTER', 'mt1') }}',
+                pusherHost: '{{ env('PUSHER_HOST', '') }}',
+                pusherPort: {{ env('PUSHER_PORT', 443) }},
+                pusherScheme: '{{ env('PUSHER_SCHEME', 'https') }}'
+            };
+        </script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <!-- Reveal Animations Script -->

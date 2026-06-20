@@ -89,29 +89,36 @@ class ProductService
 
     protected function storeImage(Product $product, UploadedFile $file, bool $isPrimary = false): ProductImage
     {
-        $manager = new ImageManager(new Driver());
-        $image = $manager->read($file);
-
-        $filename = uniqid() . '.webp';
         $path = 'products/' . $product->id . '/';
-        
-        // Ensure directory exists
         Storage::disk('public')->makeDirectory($path);
 
-        // Original (max 1200px)
-        $original = clone $image;
-        $original->scaleDown(1200);
-        Storage::disk('public')->put($path . 'original_' . $filename, (string) $original->toWebp(80));
+        try {
+            $manager = new ImageManager(new Driver());
+            $image = $manager->read($file);
 
-        // Medium (max 800px)
-        $medium = clone $image;
-        $medium->scaleDown(800);
-        Storage::disk('public')->put($path . 'medium_' . $filename, (string) $medium->toWebp(80));
+            $filename = uniqid() . '.webp';
 
-        // Thumbnail (max 300px)
-        $thumbnail = clone $image;
-        $thumbnail->scaleDown(300);
-        Storage::disk('public')->put($path . 'thumb_' . $filename, (string) $thumbnail->toWebp(80));
+            // Original (max 1200px)
+            $original = clone $image;
+            $original->scaleDown(1200);
+            Storage::disk('public')->put($path . 'original_' . $filename, (string) $original->toWebp(80));
+
+            // Medium (max 800px)
+            $medium = clone $image;
+            $medium->scaleDown(800);
+            Storage::disk('public')->put($path . 'medium_' . $filename, (string) $medium->toWebp(80));
+
+            // Thumbnail (max 300px)
+            $thumbnail = clone $image;
+            $thumbnail->scaleDown(300);
+            Storage::disk('public')->put($path . 'thumb_' . $filename, (string) $thumbnail->toWebp(80));
+        } catch (\Exception $e) {
+            // Fallback if GD is missing or ImageManager fails on production
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs($path, 'original_' . $filename, 'public');
+            $file->storeAs($path, 'medium_' . $filename, 'public');
+            $file->storeAs($path, 'thumb_' . $filename, 'public');
+        }
 
         return $product->images()->create([
             'path' => $path . $filename,
