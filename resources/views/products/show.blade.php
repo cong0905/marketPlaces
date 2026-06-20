@@ -103,7 +103,7 @@
                 <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg md:p-xl">
                     <h2 class="text-headline-sm font-headline-sm text-on-surface mb-md">Mô tả chi tiết</h2>
                     <div class="text-body-md font-body-md text-on-surface-variant space-y-4 leading-relaxed whitespace-pre-line">
-                        {{ $product->description }}
+                        {!! $product->description !!}
                     </div>
                 </div>
                 
