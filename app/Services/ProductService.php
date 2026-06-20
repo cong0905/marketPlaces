@@ -62,12 +62,17 @@ class ProductService
                     ->get();
 
                 foreach ($imagesToDelete as $img) {
-                    Storage::disk('public')->delete([
-                        str_replace(basename($img->path), 'original_' . basename($img->path), $img->path),
-                        str_replace(basename($img->path), 'medium_' . basename($img->path), $img->path),
-                        str_replace(basename($img->path), 'thumb_' . basename($img->path), $img->path),
-                        $img->path
-                    ]);
+                    if (str_starts_with($img->path, 'cloudinary://')) {
+                        $publicId = str_replace('cloudinary://', '', $img->path);
+                        cloudinary()->destroy($publicId);
+                    } else {
+                        Storage::disk('public')->delete([
+                            str_replace(basename($img->path), 'original_' . basename($img->path), $img->path),
+                            str_replace(basename($img->path), 'medium_' . basename($img->path), $img->path),
+                            str_replace(basename($img->path), 'thumb_' . basename($img->path), $img->path),
+                            $img->path
+                        ]);
+                    }
                     $img->delete();
                 }
             }
@@ -89,42 +94,31 @@ class ProductService
 
     protected function storeImage(Product $product, UploadedFile $file, bool $isPrimary = false): ProductImage
     {
-        $path = 'products/' . $product->id . '/';
-        Storage::disk('public')->makeDirectory($path);
-
+        $folder = 'marketPlace/products/' . $product->id;
+        
         try {
-            $manager = new ImageManager(new Driver());
-            $image = $manager->read($file);
-
-            $filename = uniqid() . '.webp';
-
-            // Original (max 1200px)
-            $original = clone $image;
-            $original->scaleDown(1200);
-            Storage::disk('public')->put($path . 'original_' . $filename, (string) $original->toWebp(80));
-
-            // Medium (max 800px)
-            $medium = clone $image;
-            $medium->scaleDown(800);
-            Storage::disk('public')->put($path . 'medium_' . $filename, (string) $medium->toWebp(80));
-
-            // Thumbnail (max 300px)
-            $thumbnail = clone $image;
-            $thumbnail->scaleDown(300);
-            Storage::disk('public')->put($path . 'thumb_' . $filename, (string) $thumbnail->toWebp(80));
+            $response = cloudinary()->upload($file->getRealPath(), [
+                'folder' => $folder,
+            ]);
+            
+            $path = 'cloudinary://' . $response->getPublicId();
         } catch (\Throwable $e) {
-            // Fallback if GD is missing or ImageManager fails on production
+            // Fallback to local storage if Cloudinary fails
+            $path = 'products/' . $product->id . '/';
+            Storage::disk('public')->makeDirectory($path);
+            
             $extension = $file->getClientOriginalExtension() ?: 'jpg';
             $filename = uniqid() . '.' . $extension;
             
-            // storeAs moves the file, so we do it once and then copy it
             $file->storeAs($path, 'original_' . $filename, 'public');
             Storage::disk('public')->copy($path . 'original_' . $filename, $path . 'medium_' . $filename);
             Storage::disk('public')->copy($path . 'original_' . $filename, $path . 'thumb_' . $filename);
+            
+            $path = $path . $filename;
         }
 
         return $product->images()->create([
-            'path' => $path . $filename,
+            'path' => $path,
             'is_primary' => $isPrimary,
             'sort_order' => $product->images()->count(),
         ]);
@@ -146,15 +140,19 @@ class ProductService
     {
         $product = $this->productRepo->findOrFail($id);
 
-        // Delete all images from storage
+        // Delete all images from storage/Cloudinary
         foreach ($product->images as $image) {
-            $basePath = str_replace('.webp', '', $image->path);
-            Storage::disk('public')->delete([
-                str_replace(basename($image->path), 'original_' . basename($image->path), $image->path),
-                str_replace(basename($image->path), 'medium_' . basename($image->path), $image->path),
-                str_replace(basename($image->path), 'thumb_' . basename($image->path), $image->path),
-                $image->path // fallback if old format
-            ]);
+            if (str_starts_with($image->path, 'cloudinary://')) {
+                $publicId = str_replace('cloudinary://', '', $image->path);
+                cloudinary()->destroy($publicId);
+            } else {
+                Storage::disk('public')->delete([
+                    str_replace(basename($image->path), 'original_' . basename($image->path), $image->path),
+                    str_replace(basename($image->path), 'medium_' . basename($image->path), $image->path),
+                    str_replace(basename($image->path), 'thumb_' . basename($image->path), $image->path),
+                    $image->path // fallback if old format
+                ]);
+            }
         }
 
         $product->delete();

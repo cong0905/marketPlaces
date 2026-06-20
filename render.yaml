@@ -16,6 +16,8 @@ services:
       - key: APP_URL
         # Thay đổi dòng này thành URL thực tế của bạn sau khi triển khai
         value: "https://amber-marketplace.onrender.com"
+      - key: CLOUDINARY_URL
+        value: "cloudinary://768423642526461:2suGRrkqHH9F8HlAzCDvUVY8M4Y@dv2xcak7b"
       
       # Cấu hình kết nối TiDB Serverless
       - key: DB_CONNECTION
