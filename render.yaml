@@ -18,6 +18,20 @@ services:
         value: "https://amber-marketplace.onrender.com"
       - key: CLOUDINARY_URL
         value: "cloudinary://768423642526461:2suGRrkqHH9F8HlAzCDvUVY8M4Y@dv2xcak7b"
+      - key: BROADCAST_CONNECTION
+        value: "reverb"
+      - key: REVERB_APP_ID
+        value: "123456"
+      - key: REVERB_APP_KEY
+        value: "render_reverb_key"
+      - key: REVERB_APP_SECRET
+        value: "render_reverb_secret"
+      - key: REVERB_HOST
+        value: "amber-marketplace.onrender.com"
+      - key: REVERB_PORT
+        value: "443"
+      - key: REVERB_SCHEME
+        value: "https"
       
       # Cấu hình kết nối TiDB Serverless
       - key: DB_CONNECTION

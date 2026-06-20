@@ -16,5 +16,8 @@ php artisan migrate --force
 # Khởi động PHP-FPM trong background
 php-fpm &
 
+# Khởi động Laravel Reverb (chạy ngầm)
+php artisan reverb:start --host=0.0.0.0 --port=8080 &
+
 # Khởi động Nginx ở foreground
 nginx -g "daemon off;"
