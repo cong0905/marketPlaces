@@ -13,9 +13,9 @@ class VNPayService
 
     public function __construct()
     {
-        $this->tmnCode = config('services.vnpay.tmn_code', '');
-        $this->hashSecret = config('services.vnpay.hash_secret', '');
-        $this->url = config('services.vnpay.url', '');
+        $this->tmnCode = (string) config('services.vnpay.tmn_code', '');
+        $this->hashSecret = (string) config('services.vnpay.hash_secret', '');
+        $this->url = (string) config('services.vnpay.url', '');
     }
 
     /**
