@@ -112,7 +112,7 @@ class ProductService
             $thumbnail = clone $image;
             $thumbnail->scaleDown(300);
             Storage::disk('public')->put($path . 'thumb_' . $filename, (string) $thumbnail->toWebp(80));
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Fallback if GD is missing or ImageManager fails on production
             $extension = $file->getClientOriginalExtension() ?: 'jpg';
             $filename = uniqid() . '.' . $extension;
