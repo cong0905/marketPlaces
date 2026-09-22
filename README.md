@@ -1,59 +1,110 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Amber Marketplace
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern second-hand marketplace built with Laravel where users can list products, discover items, chat with sellers, place orders, make payments, review transactions, and report violations.
 
-## About Laravel
+**Live demo:** https://amber-marketplace.onrender.com
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Highlights
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- User registration, login, email verification, and profile management
+- Product listing CRUD with image upload and moderation
+- Favorites / wishlist
+- Checkout and order lifecycle management
+- VNPay payment integration
+- Buyer–seller chat
+- Reviews and notifications
+- Product and user reporting
+- Admin dashboard for users, categories, products, and reports
+- Rate limiting on sensitive actions such as checkout, chat, product creation, and reviews
+- Cloudinary for media storage
+- Dockerized deployment on Render
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tech Stack
 
-## Learning Laravel
+- **Backend:** PHP 8.2, Laravel 12
+- **Database:** MySQL-compatible database / TiDB
+- **Frontend:** Blade, Tailwind CSS, Alpine.js, Vite
+- **Realtime:** Laravel Reverb / Echo
+- **Storage:** Cloudinary
+- **Payment:** VNPay
+- **Testing:** PHPUnit
+- **Deployment:** Docker, Render
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Core Features
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Authentication & Profiles
+Users can register, sign in, verify their email, update profile information, and manage their account.
 
-## Laravel Sponsors
+### Marketplace
+Authenticated users can create, update, and delete product listings. Public users can browse products and view seller profiles.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Checkout & Orders
+The application supports checkout, VNPay payment flow, and an order lifecycle including confirmation, shipping, completion, and cancellation.
 
-### Premium Partners
+### Chat
+Buyers and sellers can start conversations around products and exchange messages inside the application.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Trust & Safety
+Users can submit reports for products or accounts. Admins can moderate listings, resolve reports, manage categories, and ban/unban users.
 
-## Contributing
+## Project Structure
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```text
+app/            Application logic, models, controllers
+database/       Migrations, factories, seeders
+resources/      Blade views, frontend assets
+routes/         Web and authentication routes
+tests/          Automated tests
+Dockerfile      Production container
+render.yaml     Render deployment configuration
+```
 
-## Code of Conduct
+## Local Setup
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Requirements
 
-## Security Vulnerabilities
+- PHP 8.2+
+- Composer
+- Node.js / npm
+- SQLite or MySQL-compatible database
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Install
 
-## License
+```bash
+git clone https://github.com/cong0905/marketPlaces.git
+cd marketPlaces
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+composer install
+npm install
+
+cp .env.example .env
+php artisan key:generate
+
+php artisan migrate
+npm run build
+php artisan serve
+```
+
+For active development:
+
+```bash
+composer run dev
+```
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and configure only the services you use.
+
+Important production secrets such as database credentials, Cloudinary credentials, Reverb secrets, and payment credentials should be stored in your hosting provider's secret manager and never committed to Git.
+
+## Testing
+
+```bash
+composer test
+```
+
+## Author
+
+**Nguyễn Đức Công**
+
+- GitHub: https://github.com/cong0905

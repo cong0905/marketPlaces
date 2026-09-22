@@ -45,7 +45,47 @@
         </style>
 
         <!-- Scripts -->
+        <script>
+            window.EchoConfig = {
+                broadcaster: '{{ config('broadcasting.default', 'reverb') }}',
+                reverbKey: '{{ config('broadcasting.connections.reverb.key') }}',
+                reverbHost: '{{ config('broadcasting.connections.reverb.options.host', '127.0.0.1') }}',
+                reverbPort: {{ config('broadcasting.connections.reverb.options.port', 80) }},
+                reverbScheme: '{{ config('broadcasting.connections.reverb.options.scheme', 'http') }}',
+                pusherKey: '{{ config('broadcasting.connections.pusher.key') }}',
+                pusherCluster: '{{ config('broadcasting.connections.pusher.options.cluster', 'mt1') }}',
+                pusherHost: '{{ config('broadcasting.connections.pusher.options.host', '') }}',
+                pusherPort: {{ config('broadcasting.connections.pusher.options.port', 443) }},
+                pusherScheme: '{{ config('broadcasting.connections.pusher.options.scheme', 'https') }}'
+            };
+        </script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- Reveal Animations Script -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '0px',
+                    threshold: 0.15
+                };
+
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate-fade-in-up');
+                            entry.target.classList.remove('opacity-0');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                document.querySelectorAll('.reveal-on-scroll').forEach((el) => {
+                    el.classList.add('opacity-0');
+                    observer.observe(el);
+                });
+            });
+        </script>
     </head>
     <body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
         @include('layouts.navigation')

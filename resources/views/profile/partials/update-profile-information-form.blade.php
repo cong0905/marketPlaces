@@ -152,7 +152,7 @@
                     isLoading: true,
                     
                     init() {
-                        fetch('https://provinces.open-api.vn/api/?depth=2')
+                        fetch('/api/locations')
                             .then(res => res.json())
                             .then(data => {
                                 this.provinces = data;

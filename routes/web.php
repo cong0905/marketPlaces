@@ -26,6 +26,19 @@ Route::get('/nguoi-dung/{user}', [\App\Http\Controllers\UserController::class, '
 // VNPay IPN Route (Public access for server-to-server callback)
 Route::get('/thanh-toan/vnpay/ipn', [\App\Http\Controllers\PaymentController::class, 'vnpayIpn'])->name('payment.vnpay.ipn');
 
+// ── Internal API Routes ────────────────────────────────
+Route::get('/api/locations', function () {
+    return response()->json(\App\Models\Province::with('districts')->orderBy('name')->get());
+})->name('api.locations');
+
+Route::get('/api/provinces', function () {
+    return response()->json(\App\Models\Province::orderBy('name')->get());
+})->name('api.provinces');
+
+Route::get('/api/provinces/{province}/districts', function (\App\Models\Province $province) {
+    return response()->json($province->districts()->orderBy('name')->get());
+})->name('api.districts');
+
 // ── Authenticated Routes ───────────────────────────────
 Route::middleware(['auth', 'verified'])->group(function () {
 
