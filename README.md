@@ -1,110 +1,85 @@
 # Amber Marketplace
 
-A modern second-hand marketplace built with Laravel where users can list products, discover items, chat with sellers, place orders, make payments, review transactions, and report violations.
+Website mua bán đồ đã qua sử dụng, xây dựng bằng **PHP 8.2+ / Laravel 12**. Người dùng có thể đăng tin, tìm sản phẩm, trao đổi với người bán, đặt mua và theo dõi đơn hàng; quản trị viên xử lý tin đăng và báo cáo vi phạm.
 
-**Live demo:** https://amber-marketplace.onrender.com
+[Cài đặt](#chạy-cục-bộ) · [Cấu hình](#cấu-hình-tích-hợp) · [Kiểm thử](#kiểm-thử) · [Mã nguồn](https://github.com/cong0905/marketPlaces)
 
-## Highlights
+## Chức năng trong mã nguồn
 
-- User registration, login, email verification, and profile management
-- Product listing CRUD with image upload and moderation
-- Favorites / wishlist
-- Checkout and order lifecycle management
-- VNPay payment integration
-- Buyer–seller chat
-- Reviews and notifications
-- Product and user reporting
-- Admin dashboard for users, categories, products, and reports
-- Rate limiting on sensitive actions such as checkout, chat, product creation, and reviews
-- Cloudinary for media storage
-- Dockerized deployment on Render
+| Nhóm | Phạm vi |
+| --- | --- |
+| Tài khoản | Đăng ký, đăng nhập, xác minh email, hồ sơ; tích hợp Google OAuth |
+| Tin đăng | Danh sách/chi tiết sản phẩm, đăng–sửa–xóa tin, tải ảnh, yêu thích |
+| Giao dịch | Đặt mua, xác nhận, giao hàng, hoàn thành, hủy đơn; tích hợp VNPay return/IPN |
+| Tương tác | Chat theo sản phẩm, thông báo và đánh giá đơn hàng |
+| Quản trị | Dashboard, danh mục, duyệt/từ chối tin, xử lý báo cáo, khóa/mở khóa người dùng |
 
-## Tech Stack
+Một số thao tác yêu cầu đăng nhập và xác minh email. Các tích hợp thanh toán, email, OAuth và realtime cần thông tin dịch vụ hợp lệ để hoạt động đầy đủ.
 
-- **Backend:** PHP 8.2, Laravel 12
-- **Database:** MySQL-compatible database / TiDB
-- **Frontend:** Blade, Tailwind CSS, Alpine.js, Vite
-- **Realtime:** Laravel Reverb / Echo
-- **Storage:** Cloudinary
-- **Payment:** VNPay
-- **Testing:** PHPUnit
-- **Deployment:** Docker, Render
+## Công nghệ & cấu trúc
 
-## Core Features
-
-### Authentication & Profiles
-Users can register, sign in, verify their email, update profile information, and manage their account.
-
-### Marketplace
-Authenticated users can create, update, and delete product listings. Public users can browse products and view seller profiles.
-
-### Checkout & Orders
-The application supports checkout, VNPay payment flow, and an order lifecycle including confirmation, shipping, completion, and cancellation.
-
-### Chat
-Buyers and sellers can start conversations around products and exchange messages inside the application.
-
-### Trust & Safety
-Users can submit reports for products or accounts. Admins can moderate listings, resolve reports, manage categories, and ban/unban users.
-
-## Project Structure
+**Backend:** Laravel 12, Eloquent, service/repository. **Giao diện:** Blade, Tailwind CSS, Alpine.js, Vite. **Dữ liệu:** SQLite mặc định local; có cấu hình MySQL. **Tích hợp:** Cloudinary, Reverb/Echo, Google Socialite, VNPay. **Kiểm thử:** PHPUnit. Có Dockerfile và cấu hình Render.
 
 ```text
-app/            Application logic, models, controllers
-database/       Migrations, factories, seeders
-resources/      Blade views, frontend assets
-routes/         Web and authentication routes
-tests/          Automated tests
-Dockerfile      Production container
-render.yaml     Render deployment configuration
+app/Http/       Controller, request và middleware
+app/Models/     Model dữ liệu
+app/Services/   Xử lý nghiệp vụ và tích hợp
+app/Repositories/ Truy cập dữ liệu
+database/       Migration, factory và seeder
+resources/      Blade, CSS và JavaScript
+routes/         Route web, auth và broadcasting
+tests/          Kiểm thử tự động
 ```
 
-## Local Setup
+## Chạy cục bộ
 
-### Requirements
+Chuẩn bị Git, PHP 8.2+ với extension database phù hợp, Composer và Node.js/npm tương thích Vite 7 (ví dụ Node 22.12+).
 
-- PHP 8.2+
-- Composer
-- Node.js / npm
-- SQLite or MySQL-compatible database
-
-### Install
-
-```bash
+```powershell
 git clone https://github.com/cong0905/marketPlaces.git
 cd marketPlaces
-
 composer install
-npm install
-
-cp .env.example .env
+npm ci
+Copy-Item .env.example .env
 php artisan key:generate
-
+New-Item -ItemType File -Path database/database.sqlite
 php artisan migrate
+php artisan storage:link
 npm run build
 php artisan serve
 ```
 
-For active development:
+Mở `http://127.0.0.1:8000`. Đây là hướng dẫn PowerShell cho database local mới; giữ nguyên database và `.env` nếu đã có dữ liệu. Khi dùng MySQL, cấu hình `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` trước khi migrate và bỏ bước tạo file SQLite.
 
-```bash
-composer run dev
-```
+Để phát triển giao diện, chạy `npm run dev` ở terminal khác. Có thể dùng `composer run dev` để chạy server, queue listener, log viewer và Vite theo script của repository.
 
-## Environment Variables
+## Cấu hình tích hợp
 
-Copy `.env.example` to `.env` and configure only the services you use.
+| Nhóm biến trong `.env` | Khi cần |
+| --- | --- |
+| `APP_URL` | URL ứng dụng và callback đúng môi trường |
+| `MAIL_*` | Gửi email thật; mặc định `MAIL_MAILER=log`, xem thư trong log local |
+| `CLOUDINARY_URL` | Upload ảnh lên Cloudinary; code có nhánh lưu local khi upload thất bại |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Đăng nhập Google; callback phải khớp cấu hình Google |
+| `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET`, `VNPAY_URL` | Thanh toán VNPay; xem `config/services.php` và `app/Services/VNPayService.php` |
+| `BROADCAST_CONNECTION`, `REVERB_*`, biến frontend tương ứng | Realtime; mặc định broadcasting local là `log` |
+| `QUEUE_CONNECTION` | Queue; mặc định dùng database, chạy worker cho tác vụ được đưa vào queue |
 
-Important production secrets such as database credentials, Cloudinary credentials, Reverb secrets, and payment credentials should be stored in your hosting provider's secret manager and never committed to Git.
+Khi bật Reverb, chạy `php artisan reverb:start` ở terminal riêng và build lại frontend sau khi đổi biến frontend. Không đưa `.env` hoặc khóa dịch vụ vào Git.
 
-## Testing
+## Kiểm thử
 
-```bash
+```powershell
 composer test
 ```
 
-## Author
+Bộ test có các nhóm auth, profile, product, checkout và review. Việc có test trong repo không khẳng định mọi tích hợp dịch vụ đã được kiểm chứng; dùng môi trường sandbox riêng để kiểm tra thanh toán/callback và email.
 
-**Nguyễn Đức Công**
+## Điểm bắt đầu đọc code
 
-- GitHub: https://github.com/cong0905
+- [Route và luồng truy cập](routes/web.php)
+- [Upload và xử lý sản phẩm](app/Services/ProductService.php)
+- [Cấu hình tích hợp](config/services.php)
+- [Cấu hình mẫu](.env.example)
+
+**Tác giả:** [Nguyễn Đức Công](https://github.com/cong0905)
